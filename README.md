@@ -2,7 +2,7 @@
 Official implementation of the project "Residual DYN: Block-Floating-Point Audio tramite Residual Learning Ibrido".
 **Student ID:** 2151006
 
-##Project Structure
+## Struttura progetto
 ```text
 .
 ├── src/                # moduli codice sorgente
@@ -18,5 +18,6 @@ Official implementation of the project "Residual DYN: Block-Floating-Point Audio
 pip install -r requirements.txt
 
 python train.py --epochs 30 --lr 0.001 --batch_size 16
+
 
 python evaluate.py
