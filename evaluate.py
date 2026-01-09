@@ -6,19 +6,19 @@ from src.model import ResidualDYN
 from src.utils import mulaw_baseline
 import os
 
-# NOTA: Abbiamo rimosso PESQ e STOI perché su Windows richiedono compilatori C++ complessi.
-# Ci basiamo sull'MSE (Mean Squared Error) e sull'analisi visiva.
+# NOTA: sono stati rimossi PESQ e STOI perché su Windows richiedono compilatori C++ complessi.
+# base sull'MSE (Mean Squared Error) e sull'analisi visiva.
 
 def run_evaluation():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("--- VALUTAZIONE MODELLO (Solo MSE) ---")
     
-    # Caricamento Modello
+    #caricamento Modello
     model = ResidualDYN().to(device)
     ckpt_path = os.path.join('checkpoints', 'residual_dyn_final.pth')
     
     if os.path.exists(ckpt_path):
-        # weights_only=True è per sicurezza nelle nuove versioni di Torch
+        #weights_only=True è per sicurezza nelle nuove versioni di Torch
         try:
             model.load_state_dict(torch.load(ckpt_path, map_location=device, weights_only=True))
         except:
@@ -30,12 +30,12 @@ def run_evaluation():
 
     model.eval()
     
-    # Dataset
+    #dataset
     ds = AudioDataset(root_dir='./data', subset='test-clean', download=False)
     
-    # Prendi un sample specifico (es. indice 10) per visualizzazione
+    #si prende un sample specifico (es. indice 10) per visualizzazione
     idx = 10
-    if len(ds) <= idx: idx = 0 # Safety check se il dataset è piccolo
+    if len(ds) <= idx: idx = 0 #safety check se il dataset è piccolo
     
     m, g, target = ds[idx]
     target_np = target.numpy()
@@ -44,14 +44,14 @@ def run_evaluation():
         m_in = m.unsqueeze(0).to(device)
         g_in = g.unsqueeze(0).to(device)
         
-        # Predizione rete
+        #predizione rete
         pred_tensor = model(m_in, g_in).squeeze()
         pred = pred_tensor.cpu().numpy()
 
-    # Baseline Mu-Law per confronto
+    #baseline Mu-Law per confronto
     bl = mulaw_baseline(target_np)
     
-    # Calcolo MSE
+    #calcolo MSE
     mse_model = np.mean((target_np - pred)**2)
     mse_bl = np.mean((target_np - bl)**2)
     
@@ -60,13 +60,13 @@ def run_evaluation():
     print(f"MSE ResidualDYN:       {mse_model:.2e}")
     print("-" * 30)
     
-    # --- PLOTTING ---
+    #plot
     print("Generazione grafico...")
     plt.figure(figsize=(10, 8))
     
-    # 1. Waveform Zoom
+    #Waveform Zoom
     plt.subplot(2, 1, 1)
-    # Cerchiamo di centrare lo zoom su una parte interessante
+    #centrare lo zoom su una parte interessante
     mid = len(target_np) // 2
     zoom_slice = slice(mid, mid+200) 
     
@@ -76,7 +76,7 @@ def run_evaluation():
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # 2. Errore Residuo
+    #Errore Residuo
     plt.subplot(2, 1, 2)
     plt.plot(target_np - bl, label='Err Baseline (Mu-Law)', alpha=0.5, color='blue')
     plt.plot(target_np - pred, label='Err ResidualDYN', alpha=0.8, color='orange')
@@ -89,4 +89,5 @@ def run_evaluation():
     print("Grafico salvato come 'evaluation_results.png'")
 
 if __name__ == "__main__":
+
     run_evaluation()
