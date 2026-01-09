@@ -9,30 +9,30 @@ from src.model import ResidualDYN
 import os
 
 def train_model(args):
-    print("--- INIZIO TRAINING RESIDUAL DYN ---")
+    print("INIZIO TRAINING RESIDUAL DYN")
     
     # Configurazione Device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device in uso: {device}")
 
-    # 1. Dataset e DataLoader
-    # Usa test-clean per velocità come nel notebook originale
+    #dataset e dataLoader
+    #test-clean per velocità (vedi notebooks)
     train_ds = AudioDataset(root_dir=args.data_dir, subset='test-clean', download=True)
     loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
     
-    # 2. Modello
+    #modello
     model = ResidualDYN().to(device)
     print(f"Modello creato con {sum(p.numel() for p in model.parameters())} parametri.")
     
-    # 3. Loss e Ottimizzatore
+    #loss e ottimizzatore
     criterion = nn.MSELoss() # Loss standard per regressione
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-5)
     
-    # Scheduler OneCycleLR (fondamentale per convergenza rapida)
+    #Scheduler OneCycleLR (fondamentale per convergenza rapida)
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=args.lr, 
                                               steps_per_epoch=len(loader), epochs=args.epochs)
     
-    # 4. Ciclo di Training
+    #ciclo training
     model.train()
     for epoch in range(args.epochs):
         total_loss = 0
@@ -41,13 +41,13 @@ def train_model(args):
             
             optimizer.zero_grad()
             
-            # Forward
+            #forward
             output = model(m, g)
             
-            # Loss calcolata sul target reale
+            #loss calcolata sul target reale
             loss = criterion(output.squeeze(), target)
             
-            # Backward
+            #backward
             loss.backward()
             optimizer.step()
             scheduler.step()
@@ -57,7 +57,7 @@ def train_model(args):
         avg_loss = total_loss / len(loader)
         print(f"Epoch [{epoch+1}/{args.epochs}] Loss: {avg_loss:.2e}")
         
-    # 5. Salvataggio
+    #salvataggio
     os.makedirs(args.save_dir, exist_ok=True)
     save_path = os.path.join(args.save_dir, 'residual_dyn_final.pth')
     torch.save(model.state_dict(), save_path)
@@ -72,4 +72,5 @@ if __name__ == "__main__":
     parser.add_argument("--save_dir", type=str, default="./checkpoints", help="Cartella output")
     
     args = parser.parse_args()
+
     train_model(args)
