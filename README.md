@@ -8,7 +8,8 @@ Official implementation of the project "Residual DYN: Block-Floating-Point Audio
 ├── src/                # moduli codice sorgente
 │   ├── model.py        # CNN (rete neurale)
 │   ├── dsp.py          # DYN quantizzazione (funzioni)
-│   └── dataset.py      # LibriSpeech caricamento dati 
+│   └── dataset.py      # LibriSpeech caricamento dati
+├── notebooks/          # copia del Colab su cui si è sviluppato il codice
 ├── train.py            # addestramento
 ├── evaluate.py         # grafici e metriche
 ├── requirements.txt    # dipendenze Python 
@@ -20,4 +21,5 @@ pip install -r requirements.txt
 python train.py --epochs 30 --lr 0.001 --batch_size 16
 
 python evaluate.py
+
 
