@@ -22,4 +22,5 @@ python train.py --epochs 30 --lr 0.001 --batch_size 16
 
 python evaluate.py
 
+python 3.12
 
